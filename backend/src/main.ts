@@ -1,5 +1,5 @@
 import "./loadEnv"; // must be first: runs before dataSource so DATABASE_URL is set
-import { AppDataSource } from "./dataSource";
+import { AppDataSource } from "./datasource";
 import { createApp } from "./app";
 
 async function bootstrap() {
