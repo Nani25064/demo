@@ -1,0 +1,16 @@
+services:
+  backend:
+    build: ./backend
+    ports:
+      - "9080:9080"
+    environment:
+      - NODE_ENV=development
+      - DATABASE_URL=postgresql://postgres:12345678@client-rds-postgres-prod.cd02yeymmv4n.us-east-2.rds.amazonaws.com:5432/cicd_demo_products_db
+      - PORT=9080
+  frontend:
+    build: ./frontend
+    ports:
+      - "5173:5173"
+    environment:
+      - NODE_ENV=development
+      - VITE_BASE_URL=http://localhost:9080
