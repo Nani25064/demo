@@ -1,0 +1,42 @@
+name: CD - Deploy to EC2 (public repo, build on server)
+
+on:
+  push:
+    branches: ["main"]
+
+concurrency:
+  group: cd-main
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: SSH deploy (git pull + compose build + up)
+        uses: appleboy/ssh-action@v1.2.0
+        with:
+          host: 3.90.180.157
+          username: ec2-user
+          key: ${{ secrets.SSH_KEY }}
+          port: 22
+          script: |
+            set -e
+
+            sudo mkdir -p /opt/product-app
+            sudo chown -R $USER:$USER /opt/product-app
+            cd /opt/product-app
+
+            # Clone once (public repo)
+            if [ ! -d ".git" ]; then
+              git clone https://github.com/${{ github.repository }}.git .
+            fi
+
+            # Always pull latest main
+            git fetch --all
+            git reset --hard origin/main
+
+            # Build & run containers on EC2
+            docker compose -f docker-compose.yml up -d --build --remove-orphans
+
+            # Cleanup old images
+            docker image prune -f
